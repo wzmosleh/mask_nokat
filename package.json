@@ -1,0 +1,11 @@
+{
+  "name": "notes-vocales",
+  "private": true,
+  "description": "Saisie vocale des notes dans le fichier Massar",
+  "scripts": {
+    "test": "node tests/parser.test.js && node tests/massar.test.js"
+  },
+  "devDependencies": {
+    "jszip": "3.10.1"
+  }
+}
