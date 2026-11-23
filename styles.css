@@ -276,3 +276,9 @@ body { padding-bottom: calc(40px + var(--sab)); }
   .masthead.compact .top-btn { min-height: 32px; padding: 4px 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .logo, .app-title, .titles, .top-in { transition: none; } }
+
+/* nom de l'application et sa description */
+.app-title { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; letter-spacing: .01em; }
+.app-title .tagline { font-size: .62em; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+@media (max-width: 640px) { .app-title .tagline { display: none; } }
+.masthead.compact .app-title .tagline { display: none; }

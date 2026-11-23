@@ -1,4 +1,4 @@
-/* Saisie vocale des notes dans le fichier Massar (voir SPEC.md). */
+/* Dictanote : saisie vocale des notes dans le fichier Massar (voir SPEC.md). */
 (function () {
   'use strict';
   const P = window.NotesParser;
@@ -461,7 +461,7 @@
   function render() {
     const d = window.I18N[S.ui];
     document.documentElement.lang = S.ui; document.documentElement.dir = d.dir;
-    document.title = t('title');
+    document.title = t('title') + ' – ' + t('tagline');
     renderTop();
     renderSteps();
     const app = $('#app');
@@ -483,7 +483,7 @@
     const ph = $('#permHint'); if (ph) ph.hidden = NATIVE || !(micPerm === 'prompt' || fromFile);
   }
   function renderTop() {
-    $('#appTitle').textContent = t('title');
+    $('#appTitle').innerHTML = `${esc(t('title'))}<span class="tagline">${esc(t('tagline'))}</span>`;
     $('#langBtn').innerHTML = `<span class="long">${esc(t('switchLang'))}</span><span class="short">${esc(t('switchLangShort'))}</span>`;
     $('#langBtn').setAttribute('aria-label', t('switchLang'));
     $('#homeLabel').textContent = t('home');

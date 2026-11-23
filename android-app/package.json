@@ -1,7 +1,7 @@
 {
-  "name": "mask-nokat-android",
+  "name": "dictanote-android",
   "private": true,
-  "description": "Application Android : saisie vocale des notes Massar",
+  "description": "Dictanote pour Android : saisie vocale des notes Massar",
   "scripts": {
     "www": "node scripts/copy-web.js",
     "sync": "node scripts/copy-web.js && npx cap sync android"

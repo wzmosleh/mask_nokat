@@ -1,6 +1,6 @@
 {
-  "appId": "ma.rmosleh.masknokat",
-  "appName": "مسك النقط بالصوت",
+  "appId": "ma.rmosleh.dictanote",
+  "appName": "Dictanote",
   "webDir": "www",
   "android": {
     "allowMixedContent": false

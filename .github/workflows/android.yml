@@ -40,21 +40,26 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
-          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/mask-nokat.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/dictanote.apk"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: mask-nokat-apk
-          path: mask-nokat.apk
+          name: dictanote-apk
+          path: dictanote.apk
+
+      - name: Suppression de l'ancien fichier (mask-nokat.apk)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete-asset android mask-nokat.apk --yes --repo "$GITHUB_REPOSITORY" || true
 
       - name: Publication dans « Releases »
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android
-          name: مسك النقط بالصوت — تطبيق Android
+          name: Dictanote — تطبيق Android
           make_latest: true
-          files: mask-nokat.apk
+          files: dictanote.apk
           body: |
-            تطبيق Android لمسك النقط بالصوت.
-            حمّل الملف mask-nokat.apk على الهاتف، ثم افتحه للتثبيت.
+            Dictanote: مسك النقط بالصوت (Saisie vocale des notes).
+            حمّل الملف dictanote.apk على الهاتف، ثم افتحه للتثبيت.
             (يجب السماح بتثبيت التطبيقات من هذا المصدر عند أول تثبيت.)

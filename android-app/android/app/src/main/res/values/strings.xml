@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">مسك النقط بالصوت</string>
-    <string name="title_activity_main">مسك النقط بالصوت</string>
-    <string name="package_name">ma.rmosleh.masknokat</string>
-    <string name="custom_url_scheme">ma.rmosleh.masknokat</string>
+    <string name="app_name">Dictanote</string>
+    <string name="title_activity_main">Dictanote</string>
+    <string name="package_name">ma.rmosleh.dictanote</string>
+    <string name="custom_url_scheme">ma.rmosleh.dictanote</string>
 </resources>

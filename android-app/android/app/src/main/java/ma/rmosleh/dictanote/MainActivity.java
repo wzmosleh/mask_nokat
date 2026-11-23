@@ -1,4 +1,4 @@
-package ma.rmosleh.masknokat;
+package ma.rmosleh.dictanote;
 
 import com.getcapacitor.BridgeActivity;
 
