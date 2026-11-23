@@ -1,0 +1,8 @@
+{
+  "appId": "ma.rmosleh.masknokat",
+  "appName": "مسك النقط بالصوت",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}

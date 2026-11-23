@@ -6,6 +6,7 @@
   const STORE_KEY = 'notes-vocales:session';
   const UI_KEY = 'notes-vocales:ui';
   const XLSX_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  const NATIVE = !!(window.Native && window.Native.isNative); // application Android (voir native.js)
 
   // ------------------------------------------------------------------ état
   const S = {
@@ -70,6 +71,16 @@
   }
   // dit une phrase dans la langue de l'interface, sinon dans l'autre langue, sinon un bip
   function say(key, vars, { onlyArabic = false } = {}) {
+    if (NATIVE) {
+      const lang = onlyArabic ? 'ar' : S.ui;
+      let text = key === null ? vars : window.I18N[lang][key];
+      if (vars && key !== null) text = text.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : ''));
+      mutedUntil = Date.now() + 60000;
+      window.Native.speak(text, lang === 'ar' ? 'ar' : 'fr-FR')
+        .catch(() => beep(key && /^say\.(who|choose|yesNo|replace)/.test(key) ? 'question' : 'error'))
+        .finally(() => { mutedUntil = Date.now() + 400; });
+      return;
+    }
     if (!('speechSynthesis' in window)) { beep(); return; }
     const order = onlyArabic ? ['ar'] : [S.ui]; // pas de voix dans la langue choisie : signal sonore
     for (const lang of order) {
@@ -106,6 +117,7 @@
 
   // ------------------------------------------------------------------ reconnaissance vocale
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const canListen = !!SR || NATIVE;
   const fromFile = location.protocol === 'file:';
   let rec = null; let wantListening = false; let micPerm = 'unknown';
   if (navigator.permissions && navigator.permissions.query) {
@@ -115,6 +127,7 @@
   }
 
   function startListening() {
+    if (NATIVE) { nativeListen(); return; }
     if (!SR) { S.error = t('noSR'); render(); return; }
     S.error = '';
     wantListening = true;
@@ -179,8 +192,35 @@
 
   function stopListening() {
     wantListening = false;
+    if (NATIVE) window.Native.speech.stop();
     if (rec) { try { rec.stop(); } catch (e) { /* rien */ } }
     S.interim = '';
+  }
+
+  // Android : le service vocal écoute une phrase à la fois ; on relance l'écoute après chaque phrase
+  let nativeLoop = false;
+  const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function nativeListen() {
+    S.error = ''; wantListening = true; renderLive();
+    let granted = false;
+    try { granted = await window.Native.speech.ensurePermission(); } catch (e) { granted = false; }
+    if (!granted) { wantListening = false; S.error = t('err.mic'); render(); return; }
+    if (nativeLoop) return;
+    nativeLoop = true;
+    while (wantListening && S.screen === 'dictate') {
+      while (wantListening && Date.now() < mutedUntil) await pause(150); // l'application parle : on attend
+      if (!wantListening) break;
+      try {
+        const alts = (await window.Native.speech.listenOnce(S.lang)).map((x) => x.trim()).filter(Boolean);
+        if (wantListening && alts.length) handleSpeech(alts);
+      } catch (e) {
+        // silence ou phrase non reconnue : on relance ; permission retirée : on arrête
+        if (/permission|denied|insufficient/i.test(String((e && e.message) || e))) { wantListening = false; S.error = t('err.mic'); render(); break; }
+        await pause(250);
+      }
+    }
+    nativeLoop = false;
+    renderLive();
   }
 
   // ------------------------------------------------------------------ compréhension
@@ -440,7 +480,7 @@
     const h = $('#heard'); if (h) h.innerHTML = heardHtml();
     const m = $('#mic'); if (m) { m.classList.toggle('on', wantListening); m.setAttribute('aria-pressed', String(wantListening)); }
     const ms = $('#micState'); if (ms) ms.textContent = micStateText();
-    const ph = $('#permHint'); if (ph) ph.hidden = !(micPerm === 'prompt' || fromFile);
+    const ph = $('#permHint'); if (ph) ph.hidden = NATIVE || !(micPerm === 'prompt' || fromFile);
   }
   function renderTop() {
     $('#appTitle').textContent = t('title');
@@ -478,7 +518,7 @@
   }
   function goHome() { stopListening(); S.pending = null; S.selected = null; S.screen = 'open'; persist(); render(); }
 
-  const micStateText = () => (!SR ? t('mic.na') : wantListening ? (S.pending ? t('mic.waiting') : t('mic.on')) : t('mic.off'));
+  const micStateText = () => (!canListen ? t('mic.na') : wantListening ? (S.pending ? t('mic.waiting') : t('mic.on')) : t('mic.off'));
   const heardHtml = () => (S.interim ? `<span class="interim">${esc(S.interim)}…</span>` : S.heard ? esc(t('dict.heard', { t: S.heard })) : `<span class="muted">${esc(t('dict.heardEmpty'))}</span>`);
   const logHtml = () => S.log.map((l) => `<li class="lg-${l.kind}"><b>${esc(l.text)}</b><span>${esc(l.msg)}</span></li>`).join('');
   const errorHtml = () => (S.error ? `<div class="alert alert-err" role="alert">${esc(S.error)}</div>` : '');
@@ -495,7 +535,7 @@
     }
     return `<div class="stack">
       ${resumeHtml}${errorHtml()}
-      ${!SR ? `<div class="alert alert-warn">${esc(t('noSR'))}</div>` : ''}
+      ${!canListen ? `<div class="alert alert-warn">${esc(t('noSR'))}</div>` : ''}
       ${fromFile ? `<div class="alert alert-warn">${esc(t('fileProto'))}</div>` : ''}
       <label class="drop" id="drop" for="fileInput">
         <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 18v-6M9 15l3-3 3 3"/></svg>
@@ -609,7 +649,7 @@
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
             <div class="stack" style="gap:4px;min-width:0"><b id="micState">${esc(micStateText())}</b><div class="heard" id="heard">${heardHtml()}</div></div>
           </div>
-          <p class="small muted" id="permHint" ${micPerm === 'prompt' || fromFile ? '' : 'hidden'}>${esc(t('permHint'))}</p>
+          <p class="small muted" id="permHint" ${!NATIVE && (micPerm === 'prompt' || fromFile) ? '' : 'hidden'}>${esc(t('permHint'))}</p>
           ${fbHtml}
           ${pendingBtns}
           <form class="typein" id="typeForm"><input id="typeIn" type="text" autocomplete="off" placeholder="${esc(t('dict.typePh'))}"><button class="btn btn-ghost">${esc(t('dict.enter'))}</button></form>
@@ -679,14 +719,22 @@
     const ch = changes();
     let bytes;
     try { bytes = await M.write(S.book, ch); } catch (e) { S.error = t('err.save', { m: e.message }); render(); return; }
-    // le fichier est téléchargé tout de suite ; l'enseignant le place ensuite où il veut
     const file = new File([bytes], S.fileName, { type: XLSX_TYPE });
-    download(file);
+    let where = t('save.where');
+    if (NATIVE) {
+      // Android : fichier enregistré dans le téléphone, puis partage possible (WhatsApp…)
+      try { where = t('save.whereApp', { path: await window.Native.saveFile(S.fileName, toB64(bytes)) }); }
+      catch (e) { where = t('err.save', { m: e.message || e }); }
+    } else {
+      download(file); // web : téléchargement, l'enseignant place ensuite le fichier où il veut
+    }
     const card = $('#modalCard');
+    card._bytes = bytes;
     card.innerHTML = `<h2 id="modalTitle">${esc(t('save.title'))}</h2>
       <p>${esc(t('save.text', { n: Object.keys(ch).filter((k) => ch[k] != null).length, file: S.fileName }))}</p>
-      <p class="muted">${esc(t('save.where'))}</p>
-      <div class="row"><button class="btn btn-ghost" data-act="download">${esc(t('save.again'))}</button><span class="spacer"></span>
+      <p class="muted">${esc(where)}</p>
+      ${NATIVE ? `<button class="btn btn-wa btn-big" data-act="share"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.2z"/></svg>${esc(t('save.whatsapp'))}</button>` : ''}
+      <div class="row">${NATIVE ? '' : `<button class="btn btn-ghost" data-act="download">${esc(t('save.again'))}</button>`}<span class="spacer"></span>
         <button class="btn btn-ghost" data-act="closeModal">${esc(t('save.close'))}</button><button class="btn btn-primary" data-act="newWork">${esc(t('save.new'))}</button></div>`;
     $('#modal').hidden = false;
     card._file = file;
@@ -736,6 +784,11 @@
       case 'toDictate': startDictation(); break;
       case 'save': save(); break;
       case 'download': download($('#modalCard')._file); break;
+      case 'share': {
+        const c = $('#modalCard');
+        try { await window.Native.shareFile(S.fileName, toB64(c._bytes), t('save.waText')); } catch (e) { if (!/cancel/i.test(String((e && e.message) || e))) { S.error = t('err.save', { m: e.message || e }); render(); } }
+        break;
+      }
       case 'closeModal': $('#modal').hidden = true; break;
       case 'newWork': $('#modal').hidden = true; reset(); break;
       default: break;
@@ -771,6 +824,16 @@
   document.addEventListener('dragleave', () => { const d = $('#drop'); if (d) d.classList.remove('over'); });
   document.addEventListener('drop', (ev) => { const d = $('#drop'); if (!d) return; ev.preventDefault(); d.classList.remove('over'); const f = ev.dataTransfer.files[0]; if (f) openFile(f); });
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { const m = $('#modal'); if (!m.hidden) m.hidden = true; } });
+
+  // bouton « retour » d'Android : fermer la fenêtre, revenir à l'accueil, puis quitter
+  if (NATIVE) {
+    window.Native.onBack(() => {
+      const m = $('#modal');
+      if (!m.hidden) { m.hidden = true; return; }
+      if (S.screen !== 'open') { goHome(); return; }
+      window.Native.exit();
+    });
+  }
 
   render();
 })();

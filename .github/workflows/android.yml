@@ -1,0 +1,60 @@
+# Construit l'application Android (APK) à chaque mise à jour de main,
+# puis la publie dans la page « Releases » du dépôt.
+name: Application Android
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: android-app/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Dépendances
+        working-directory: android-app
+        run: npm ci
+
+      - name: Copie de l'application web dans le projet Android
+        working-directory: android-app
+        run: npm run sync
+
+      - name: Construction de l'APK
+        working-directory: android-app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/mask-nokat.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mask-nokat-apk
+          path: mask-nokat.apk
+
+      - name: Publication dans « Releases »
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android
+          name: مسك النقط بالصوت — تطبيق Android
+          make_latest: true
+          files: mask-nokat.apk
+          body: |
+            تطبيق Android لمسك النقط بالصوت.
+            حمّل الملف mask-nokat.apk على الهاتف، ثم افتحه للتثبيت.
+            (يجب السماح بتثبيت التطبيقات من هذا المصدر عند أول تثبيت.)
