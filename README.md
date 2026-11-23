@@ -39,6 +39,7 @@ npm install
 npm test                 # المحلّل وملف مسار
 node tests/e2e.test.js   # المسار الكامل داخل Chromium (يتطلب Playwright)
 node tests/mobile.test.js  # العرض على الهاتف
+node tests/share.test.js   # المشاركة عبر واتساب
 ```
 
 لا تضع ملفات مسار حقيقية في هذا المستودع: فيها أسماء تلاميذ قاصرين وأرقامهم.
