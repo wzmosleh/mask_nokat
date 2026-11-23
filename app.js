@@ -825,6 +825,15 @@
   document.addEventListener('drop', (ev) => { const d = $('#drop'); if (!d) return; ev.preventDefault(); d.classList.remove('over'); const f = ev.dataTransfer.files[0]; if (f) openFile(f); });
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { const m = $('#modal'); if (!m.hidden) m.hidden = true; } });
 
+  // en-tête fixe : réduit en défilant ; sa hauteur sert à placer le panneau de dictée et la liste
+  const mast = $('#masthead');
+  const onScroll = () => mast.classList.toggle('compact', window.scrollY > 24);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  const setMastH = () => document.documentElement.style.setProperty('--mast-h', mast.offsetHeight + 'px');
+  if (window.ResizeObserver) new ResizeObserver(setMastH).observe(mast);
+  setMastH();
+
   // bouton « retour » d'Android : fermer la fenêtre, revenir à l'accueil, puis quitter
   if (NATIVE) {
     window.Native.onBack(() => {

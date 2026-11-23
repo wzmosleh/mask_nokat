@@ -21,6 +21,7 @@ button { cursor: pointer; }
 [hidden] { display: none !important; }
 
 /* ---------- en-tête ---------- */
+.masthead { position: sticky; top: 0; z-index: 25; }
 .top { background: #fff; border-bottom: 4px solid var(--navy); box-shadow: 0 3px 0 var(--yellow); margin-bottom: 3px; padding-top: var(--sat); padding-left: var(--sal); padding-right: var(--sar); }
 /* bande blanche sous la barre d'état quand la page défile */
 body::before { content: ""; position: fixed; inset: 0 0 auto 0; height: var(--sat); background: #fff; z-index: 30; }
@@ -37,7 +38,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto 0; height: var(--sa
 .top-btn .short { display: none; }
 
 /* barre des étapes, toujours visible en haut */
-.stepbar { position: sticky; top: var(--sat); z-index: 20; background: rgba(255,255,255,.96); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+.stepbar { z-index: 20; background: rgba(255,255,255,.96); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
 .stepbar-in { max-width: 1180px; margin: 0 auto; padding: 8px max(16px, 3vw); display: flex; align-items: center; gap: 12px; }
 .steps { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; overflow-x: auto; min-width: 0; }
 .steps li { display: flex; align-items: center; gap: 4px; flex: none; }
@@ -104,7 +105,7 @@ select { padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); 
 /* ---------- dictée ---------- */
 .dictate { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 900px) { .dictate { grid-template-columns: minmax(0, 1fr); } }
-.focus { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 76px; }
+.focus { display: flex; flex-direction: column; gap: 16px; position: sticky; top: calc(var(--mast-h, 180px) + 12px); }
 @media (max-width: 900px) { .focus { position: static; } }
 .current { text-align: center; padding: 26px 18px; }
 .current .label { color: var(--muted); font-size: .9rem; }
@@ -189,7 +190,7 @@ td input:invalid { border-color: var(--err); background: var(--err-soft); }
 body { padding-bottom: calc(40px + var(--sab)); }
 
 /* ---------- liste des élèves : défilement interne ---------- */
-.list-body { max-height: calc(100vh - 230px); overflow-y: auto; overscroll-behavior: contain; }
+.list-body { max-height: calc(100vh - var(--mast-h, 180px) - 110px); overflow-y: auto; overscroll-behavior: contain; }
 
 /* ---------- téléphone ---------- */
 @media (max-width: 640px) {
@@ -262,3 +263,16 @@ body { padding-bottom: calc(40px + var(--sab)); }
 }
 .btn-wa { background: #1fa855; color: #fff; justify-content: center; width: 100%; }
 .btn-wa:hover { background: #178f47; }
+
+/* en-tête réduit dès que la page défile */
+.logo, .app-title, .titles, .top-in { transition: height .2s ease, font-size .2s ease, padding .2s ease, gap .2s ease; }
+.masthead.compact .top-in { padding-block: 4px; }
+.masthead.compact .logo { height: 52px; }
+.masthead.compact .app-title { font-size: 1.1rem; }
+@media (max-width: 640px) {
+  .masthead.compact .top-info { display: none; }
+  .masthead.compact .logo { height: 38px; }
+  .masthead.compact .app-title { font-size: .92rem; }
+  .masthead.compact .top-btn { min-height: 32px; padding: 4px 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .logo, .app-title, .titles, .top-in { transition: none; } }

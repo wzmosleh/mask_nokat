@@ -32,7 +32,15 @@ const ok = (c, m) => { console.log(c ? '✓' : '✗', m); if (!c) fail++; };
     await page.click('[data-col="I"]');
     await page.click('[data-mode="ordered"]');
     await fits('préparation');
-    ok(await page.isVisible('.top-info span'), `${name} · infos du groupe visibles dans l'en-tête`);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(250);
+    ok(await page.isVisible('.top-info span'), `${name} · infos du groupe visibles dans l'en-tête (haut de page)`);
+    await page.evaluate(() => window.scrollTo(0, 400));
+    await page.waitForTimeout(250);
+    const headTop = await page.$eval('.logo', (e) => e.getBoundingClientRect().top);
+    ok(headTop >= 0 && headTop < 20, `${name} · en défilant, l'en-tête reste en haut de l'écran`);
+    ok(await page.$eval('#masthead', (e) => e.classList.contains('compact')), `${name} · en défilant, l'en-tête se réduit`);
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.click('.stepbar [data-act="start"]');
     await page.waitForSelector('.current');
     for (const g of ['12', '13', '14']) { await page.fill('#typeIn', g); await page.press('#typeIn', 'Enter'); }
