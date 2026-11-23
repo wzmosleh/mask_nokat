@@ -428,7 +428,11 @@
     app.innerHTML = { open: viewOpen, setup: viewSetup, dictate: viewDictate, review: viewReview }[S.screen]();
     if (S.screen === 'dictate') {
       const target = S.mode === 'ordered' ? $('.stu.cur') : $('.stu.last');
-      if (target) target.scrollIntoView({ block: 'nearest' });
+      const box = $('#stuList');
+      if (target && box) {
+        const top = target.offsetTop - box.offsetTop;
+        if (top < box.scrollTop || top + target.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = top - box.clientHeight / 3;
+      }
     }
     const fb = $('.feedback'); if (fb && S.feedback) { fb.classList.remove('flash'); void fb.offsetWidth; fb.classList.add('flash'); }
   }
@@ -440,7 +444,8 @@
   }
   function renderTop() {
     $('#appTitle').textContent = t('title');
-    $('#langBtn').textContent = t('switchLang');
+    $('#langBtn').innerHTML = `<span class="long">${esc(t('switchLang'))}</span><span class="short">${esc(t('switchLangShort'))}</span>`;
+    $('#langBtn').setAttribute('aria-label', t('switchLang'));
     $('#homeLabel').textContent = t('home');
     $('#homeBtn').hidden = S.screen === 'open';
     $('#credit').textContent = t('credit');
@@ -614,7 +619,7 @@
       <div class="list">
         <div class="list-head"><b>${esc(column() ? column().label : '')}</b><span class="muted">${esc(t('dict.count', { a: count, b: list.length }))}</span></div>
         <div class="stu head"><span>${esc(t('col.n'))}</span><span>${esc(t('col.name'))}</span><span class="old">${esc(t('col.file'))}</span><span class="new">${esc(t('col.new'))}</span><span></span></div>
-        ${rows}
+        <div class="list-body" id="stuList">${rows}</div>
       </div>
     </div>`;
   }
@@ -636,7 +641,7 @@
     const rows = shown.map((s) => {
       const k = statusOf(s);
       const e = E()[s.row] || {};
-      return `<tr><td class="num">${list.indexOf(s) + 1}</td><td>${esc(s.name)}</td><td class="num muted">${fmt(original(s))}</td>
+      return `<tr><td class="num">${list.indexOf(s) + 1}</td><td class="nm">${esc(s.name)}</td><td class="num muted old" data-label="${esc(t('rev.before'))}">${fmt(original(s))}</td>
         <td><input type="number" min="0" max="20" step="0.01" inputmode="decimal" data-row="${s.row}" value="${e.absent ? '' : fmt(effective(s))}" aria-label="${esc(t('rev.gradeOf', { name: s.name }))}"></td>
         <td><span class="tag t-${k}">${esc(t('st.' + k))}</span></td></tr>`;
     }).join('');
@@ -759,7 +764,8 @@
     ev.preventDefault();
     const v = $('#typeIn').value.trim(); if (!v) return;
     processText(v);
-    const inp = $('#typeIn'); if (inp) inp.focus();
+    // sur téléphone, ne pas rouvrir le clavier après chaque saisie
+    const inp = $('#typeIn'); if (inp && !matchMedia('(pointer: coarse)').matches) inp.focus();
   });
   document.addEventListener('dragover', (ev) => { const d = $('#drop'); if (d) { ev.preventDefault(); d.classList.add('over'); } });
   document.addEventListener('dragleave', () => { const d = $('#drop'); if (d) d.classList.remove('over'); });

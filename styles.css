@@ -28,6 +28,7 @@ button { cursor: pointer; }
 .top-btn { display: inline-flex; align-items: center; gap: 6px; background: #fff; color: var(--navy); border: 1px solid var(--navy); border-radius: 8px; padding: 6px 14px; font-weight: 700; }
 .top-btn:hover { background: var(--navy-soft); }
 .top-btn[hidden] { display: none; }
+.top-btn .short { display: none; }
 
 /* barre des étapes, toujours visible en haut */
 .stepbar { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.96); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
@@ -180,3 +181,76 @@ td input:invalid { border-color: var(--err); background: var(--err-soft); }
   border-top: 1px solid var(--line); padding: 6px max(16px, 3vw) calc(6px + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: .8rem; }
 .foot span { color: var(--navy); opacity: .8; }
 body { padding-bottom: 40px; }
+
+/* ---------- liste des élèves : défilement interne ---------- */
+.list-body { max-height: calc(100vh - 230px); overflow-y: auto; overscroll-behavior: contain; }
+
+/* ---------- téléphone ---------- */
+@media (max-width: 640px) {
+  body { font-size: 15px; padding-bottom: 58px; }
+  main { padding: 14px 12px 24px; }
+  h1 { font-size: 1.25rem; } h2 { font-size: 1.08rem; }
+  .card { padding: 14px; border-radius: 14px; }
+
+  /* en-tête compact sur une seule ligne */
+  .top-in { flex-wrap: nowrap; gap: 10px; padding: 6px 12px; }
+  .logo { height: 54px; }
+  .titles { padding-inline-start: 10px; gap: 3px; flex: 1; }
+  .app-title { font-size: 1rem; white-space: nowrap; }
+  .top-info { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
+  .top-info span { white-space: nowrap; font-size: .72rem; }
+  .top-actions { gap: 6px; }
+  .top-btn { padding: 6px 9px; font-size: .82rem; min-height: 36px; }
+  #homeLabel { display: none; }
+  .top-btn .long { display: none; } .top-btn .short { display: inline; }
+
+  /* barre des étapes */
+  .stepbar-in { padding: 6px 10px; gap: 8px; }
+  .steps li + li::before { width: 6px; }
+  .step { padding: 4px; gap: 5px; }
+  .step .n { width: 22px; height: 22px; }
+  .stepbar .btn { padding: 8px 12px; font-size: .88rem; }
+
+  /* ouverture */
+  .drop { padding: 28px 14px; gap: 10px; }
+  .drop svg { width: 40px; height: 40px; }
+
+  /* préparation */
+  .choices { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .btn-big { width: 100%; justify-content: center; }
+
+  /* dictée : nom, micro et réponse d'abord ; la liste ensuite */
+  .current { padding: 16px 12px; }
+  .current .name { font-size: 1.9rem; }
+  .mic { width: 68px; height: 68px; }
+  .feedback { font-size: 1rem; padding: 12px; min-height: 52px; }
+  .opt { padding: 12px; font-size: 1.05rem; }
+  .list-body { max-height: 55vh; }
+  .stu { grid-template-columns: 26px minmax(0, 1fr) 46px 52px 26px; gap: 6px; padding: 9px 10px; }
+
+  /* champs à 16 px : pas de zoom automatique sur iPhone */
+  .typein input, td input, select { font-size: 16px; }
+
+  /* vérification : chaque élève devient une ligne compacte, sans tableau large */
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .stat { padding: 10px; } .stat b { font-size: 1.4rem; }
+  .table-wrap { overflow: visible; }
+  table { min-width: 0; }
+  thead { display: none; }
+  tbody tr { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; grid-template-areas: "n nm in" "n st in"; column-gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); align-items: center; }
+  tbody tr:last-child { border-bottom: 0; }
+  tbody td { padding: 0; border: 0; }
+  tbody td:nth-child(1) { grid-area: n; color: var(--muted); font-size: .8rem; }
+  tbody td.nm { grid-area: nm; font-weight: 500; }
+  tbody td.old { display: none; }
+  tbody td:nth-child(4) { grid-area: in; }
+  tbody td:nth-child(5) { grid-area: st; }
+  td input { width: 76px; padding: 8px; }
+
+  .modal-card { padding: 18px; }
+  .modal-card .row .btn { flex: 1 1 auto; justify-content: center; }
+  .foot { font-size: .72rem; padding-top: 5px; }
+}
+@media (max-width: 400px) {
+  .step[aria-current="step"] .t { display: none; }
+}
