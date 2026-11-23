@@ -94,6 +94,9 @@ window.I18N = {
     'save.text': '{n} نقطة في الملف {file}',
     'save.where': 'يوجد الملف في مجلد التنزيلات (Téléchargements) على هذا الجهاز.',
     'save.again': 'تحميل مرة أخرى',
+    'save.whatsapp': 'مشاركة عبر واتساب',
+    'save.waText': 'ملف النقط: {file}',
+    'save.waHint': 'تم فتح واتساب. أرفق الملف من مجلد التنزيلات ثم أرسله.',
     'save.close': 'رجوع',
     'save.new': 'ملف جديد',
 
@@ -211,6 +214,9 @@ window.I18N = {
     'save.text': '{n} notes dans le fichier {file}',
     'save.where': 'Le fichier se trouve dans le dossier Téléchargements de cet appareil.',
     'save.again': 'Télécharger à nouveau',
+    'save.whatsapp': 'Partager sur WhatsApp',
+    'save.waText': 'Fichier de notes : {file}',
+    'save.waHint': 'WhatsApp est ouvert. Joignez le fichier depuis le dossier Téléchargements puis envoyez-le.',
     'save.close': 'Retour',
     'save.new': 'Nouveau fichier',
 

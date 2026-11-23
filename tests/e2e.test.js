@@ -83,7 +83,8 @@ const ok = (c, m) => { console.log(c ? '✓' : '✗', m); if (!c) fail++; };
   for (let i = 0; i < 40; i++) {
     if (await page.$('h1:has-text("مراجعة")')) break;
     if (!(await page.$('#typeIn'))) { await page.waitForTimeout(300); continue; }
-    await say(String(10 + (i % 10)));
+    // la liste peut se terminer pendant la saisie : l'écran passe alors à la vérification
+    try { await page.fill('#typeIn', String(10 + (i % 10)), { timeout: 1000 }); await page.press('#typeIn', 'Enter', { timeout: 1000 }); await page.waitForTimeout(80); } catch (e) { /* écran déjà changé */ }
   }
   await page.waitForSelector('h1:has-text("مراجعة")', { timeout: 3000 });
   ok(true, 'arrêt automatique après le dernier élève → révision');
@@ -97,7 +98,13 @@ const ok = (c, m) => { console.log(c ? '✓' : '✗', m); if (!c) fail++; };
   // sauvegarde
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-act="save"]')]);
   await page.waitForSelector('[data-act="closeModal"]');
-  ok((await page.$('[data-act="share"]')) === null, 'pas de bouton d\'envoi : téléchargement seulement');
+  ok((await page.$('[data-act="whatsapp"]')) !== null, 'bouton « مشاركة عبر واتساب » après le téléchargement');
+  await page.context().route(/wa\.me/, (r) => r.fulfill({ contentType: 'text/html', body: 'wa' }));
+  const [wa] = await Promise.all([page.context().waitForEvent('page'), page.click('[data-act="whatsapp"]')]);
+  await wa.waitForLoadState();
+  ok(wa.url().startsWith('https://wa.me/') || wa.url().includes('whatsapp'), 'sans partage de fichier : WhatsApp s\'ouvre avec un message');
+  ok(await page.isVisible('#waHint'), 'consigne : joindre le fichier téléchargé');
+  await wa.close();
   ok(dl.suggestedFilename() === 'fixture-massar.xlsx', 'même nom de fichier');
   const out = path.join(os.tmpdir(), 'notes-vocales-e2e.xlsx');
   await dl.saveAs(out);
