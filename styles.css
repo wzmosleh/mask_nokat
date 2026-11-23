@@ -254,5 +254,3 @@ body { padding-bottom: 40px; }
 @media (max-width: 400px) {
   .step[aria-current="step"] .t { display: none; }
 }
-.btn-wa { background: #1fa855; color: #fff; justify-content: center; width: 100%; }
-.btn-wa:hover { background: #178f47; }

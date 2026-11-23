@@ -94,9 +94,6 @@ window.I18N = {
     'save.text': '{n} نقطة في الملف {file}',
     'save.where': 'يوجد الملف في مجلد التنزيلات (Téléchargements) على هذا الجهاز.',
     'save.again': 'تحميل مرة أخرى',
-    'save.whatsapp': 'مشاركة عبر واتساب',
-    'save.waText': 'ملف النقط',
-    'save.waHint': 'هذا المتصفح لا يسمح بإرفاق ملف Excel تلقائيا. سيفتح واتساب: اختر المحادثة، ثم اضغط على 📎 ← مستند ← التنزيلات، واختر الملف.',
     'save.close': 'رجوع',
     'save.new': 'ملف جديد',
 
@@ -214,9 +211,6 @@ window.I18N = {
     'save.text': '{n} notes dans le fichier {file}',
     'save.where': 'Le fichier se trouve dans le dossier Téléchargements de cet appareil.',
     'save.again': 'Télécharger à nouveau',
-    'save.whatsapp': 'Partager sur WhatsApp',
-    'save.waText': 'Fichier de notes',
-    'save.waHint': 'Ce navigateur ne permet pas de joindre un fichier Excel automatiquement. WhatsApp va s’ouvrir : choisissez la discussion, puis 📎 → Document → Téléchargements, et sélectionnez le fichier.',
     'save.close': 'Retour',
     'save.new': 'Nouveau fichier',
 

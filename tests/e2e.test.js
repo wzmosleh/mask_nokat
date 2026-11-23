@@ -98,13 +98,7 @@ const ok = (c, m) => { console.log(c ? '✓' : '✗', m); if (!c) fail++; };
   // sauvegarde
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-act="save"]')]);
   await page.waitForSelector('[data-act="closeModal"]');
-  ok((await page.$('[data-act="whatsapp"]')) !== null, 'bouton « مشاركة عبر واتساب » après le téléchargement');
-  ok(await page.isVisible('#waHint'), 'navigateur sans partage de fichier Excel : consigne affichée avant d\'appuyer');
-  await page.context().route(/whatsapp\.com/, (r) => r.fulfill({ contentType: 'text/html', body: 'wa' }));
-  const [wa] = await Promise.all([page.context().waitForEvent('page'), page.click('[data-act="whatsapp"]')]);
-  await wa.waitForLoadState();
-  ok(wa.url().includes('whatsapp.com/send'), 'sur ordinateur : WhatsApp Web s\'ouvre par un lien, sans fenêtre pop-up bloquée');
-  await wa.close();
+  ok((await page.$('[data-act="whatsapp"]')) === null, 'version web : téléchargement seulement, sans bouton WhatsApp');
   ok(dl.suggestedFilename() === 'fixture-massar.xlsx', 'même nom de fichier');
   const out = path.join(os.tmpdir(), 'notes-vocales-e2e.xlsx');
   await dl.saveAs(out);
