@@ -54,12 +54,22 @@ const ok = (c, m) => { console.log(c ? '✓' : '✗', m); if (!c) fail++; };
   await page.goto(`http://localhost:${server.address().port}/`);
 
   ok(!(await page.$('.alert-warn')), 'pas d\'alerte « reconnaissance vocale non disponible » dans l\'application');
+  // Capacitor fournit la hauteur de la barre d'état et de la barre de navigation
+  await page.evaluate(() => { const st = document.documentElement.style; st.setProperty('--safe-area-inset-top', '36px'); st.setProperty('--safe-area-inset-bottom', '24px'); });
+  const logoTop = await page.$eval('.logo', (e) => e.getBoundingClientRect().top);
+  ok(logoTop >= 36, 'l\'en-tête commence sous la barre d\'état du téléphone (logo à ' + Math.round(logoTop) + ' px)');
+  const footPad = await page.$eval('.foot', (e) => parseFloat(getComputedStyle(e).paddingBottom));
+  ok(footPad >= 24, 'le pied de page laisse la place à la barre de navigation (' + footPad + ' px)');
   await page.setInputFiles('#fileInput', path.join(__dirname, 'fixture-massar.xlsx'));
   await page.click('[data-col="I"]');
   await page.click('[data-mode="ordered"]');
   await page.click('.stepbar [data-act="start"]');
   await page.waitForSelector('.current');
   ok(await page.isHidden('#permHint'), 'pas de consigne sur la permission du navigateur');
+  await page.evaluate(() => window.scrollTo(0, 800));
+  const barTop = await page.$eval('#stepbar', (e) => e.getBoundingClientRect().top);
+  ok(barTop >= 36, 'en défilant, la barre des étapes reste sous la barre d\'état (' + Math.round(barTop) + ' px)');
+  await page.evaluate(() => window.scrollTo(0, 0));
 
   const hear = (alts) => page.evaluate((a) => window.__say.push(a), alts);
   const cur = () => page.textContent('.current .name');
