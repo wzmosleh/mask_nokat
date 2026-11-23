@@ -461,7 +461,7 @@
   function render() {
     const d = window.I18N[S.ui];
     document.documentElement.lang = S.ui; document.documentElement.dir = d.dir;
-    document.title = t('title') + ' – ' + t('tagline');
+    document.title = t('title');
     renderTop();
     renderSteps();
     const app = $('#app');
@@ -483,7 +483,7 @@
     const ph = $('#permHint'); if (ph) ph.hidden = NATIVE || !(micPerm === 'prompt' || fromFile);
   }
   function renderTop() {
-    $('#appTitle').innerHTML = `${esc(t('title'))}<span class="tagline">${esc(t('tagline'))}</span>`;
+    $('#appTitle').textContent = t('title');
     $('#langBtn').innerHTML = `<span class="long">${esc(t('switchLang'))}</span><span class="short">${esc(t('switchLangShort'))}</span>`;
     $('#langBtn').setAttribute('aria-label', t('switchLang'));
     $('#homeLabel').textContent = t('home');

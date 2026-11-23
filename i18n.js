@@ -2,8 +2,7 @@
 window.I18N = {
   ar: {
     dir: 'rtl',
-    title: 'Dictanote',
-    tagline: 'مسك النقط بالصوت',
+    title: 'مسك النقط بالصوت',
     switchLang: 'Français', switchLangShort: 'FR',
     home: 'الرئيسية',
     'top.prof': 'الأستاذ(ة): {name}',
@@ -123,8 +122,7 @@ window.I18N = {
 
   fr: {
     dir: 'ltr',
-    title: 'Dictanote',
-    tagline: 'Saisie vocale des notes',
+    title: 'Saisie vocale des notes',
     switchLang: 'العربية', switchLangShort: 'ع',
     home: 'Accueil',
     'top.prof': 'Enseignant(e) : {name}',
